@@ -1,0 +1,259 @@
+{
+  "evidenceVersion": "1.1",
+  "engineVersion": "doc-grounded-builder/1.1.0-doc-coverage",
+  "id": "78867ff2-0bcd-4698-af4b-62e54dadb6eb",
+  "requestKey": "v1.1-contract-code-2108e2ea-807c-49c3-b43c-90b93a2c05d0",
+  "request": "Does contract 0xc879c018db60520f4355c26ed1a6d572cdac1815 have deployed bytecode on Pharos Pacific Mainnet?",
+  "intent": "contract_code",
+  "parameters": {
+    "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T10:53:10.411Z",
+    "attempt": 1,
+    "queries": [
+      "Pharos Pacific Mainnet chain ID 1672 RPC",
+      "Pharos JSON-RPC eth_getCode eth_getBlockByNumber",
+      "Does contract 0xc879c018db60520f4355c26ed1a6d572cdac1815 have deployed bytecode on Pharos Pacific Mainnet?"
+    ],
+    "answer": "COVERED — the pages document the required network and RPC operations, but **do not establish whether this address currently has deployed bytecode**.\n\n[Pacific Mainnet](/getting-started/network/pacific-mainnet) lists chain ID `1672` and RPC URL `https://rpc.pharos.xyz`. [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods) documents `eth_getCode` for retrieving bytecode at an address and `eth_getBlockByNumber` for retrieving a block by number. The [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet) identifies this address as a USDC payment-token address, but provides no `eth_getCode` result for it.\n\nSo these pages support how to check, not a yes-or-no answer about the contract’s deployed bytecode.\n\n# Sources\n\n- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)\n- [eth_getProof — Storage State Verification (SPV)](https://docs.pharos.xyz/api-and-sdk/eth-getproof)\n- [Node Configuration](https://docs.pharos.xyz/node-and-validator-guide/validator-node-deployment/node-configuration)\n- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)\n- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)\n- [RPC Infrastructure](https://docs.pharos.xyz/tooling-and-infrastructure/rpc)\n- [Enable AutoPruning in Pharos Node](https://docs.pharos.xyz/enable-pruning-in-pharos-node)\n- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)\n- [Nirvana RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/nirvana)\n- [Pharos Testnet: Rebuild Node with Preserved Node Info](https://docs.pharos.xyz/pharos-testnet-rebuild-node-with-preserved-node-info)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [Atlantic Testnet](https://docs.pharos.xyz/getting-started/network/atlantic-testnet)\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [Network](https://docs.pharos.xyz/getting-started/network)\n- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)\n- [ZAN RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/zan)\n- [Cross Chain Infrastructure](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain)\n- [Pharos Network Snapshots](https://docs.pharos.xyz/node-and-validator-guide/pharos-network-snapshots)\n- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)\n- [x402](https://docs.pharos.xyz/developer-guide/x402)\n- [Chainlink Data Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-ds)\n- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)\n- [Chainlink Push Engine Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-pe)\n- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)\n- [Chainlink CCIP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/chainlink-ccip)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "x402 Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet",
+        "retrievedAt": "2026-10-23T10:53:10.411Z",
+        "excerpt": "## Server-side: Using Express + x402 Middleware\n\nFor Express applications, you can use the middleware pattern:\n\n```ts\n\n// Load .env environment variables\nimport { config } from \"dotenv\";\nconfig();\n// Import required modules\nimport express from \"express\";\nimport { paymentMiddleware, x402ResourceServer } from \"@x402/express\";\nimport { ExactEvmScheme } from \"@x402/evm/exact/server\";\nimport { HTTPFacilitatorClient } from \"@x402/core/server\";\n\n// === Environment Configuration ===\nconst payToAddress = process.env.PAY_TO_ADDRESS as `0x${string}`;\nif (!payToAddress) {\n  console.error(\"❌ Please set the PAY_TO_ADDRESS environment variable\");\n  console.error('Example: export PAY_TO_ADDRESS=0xYourAddressHere');\n  process.exit(1);\n  }\n  const facilitatorUrl = process.env.FACILITATOR_URL; // Facilitator service URL\nconst port = parseInt(process.env.PORT || \"4021\", 10); // Listening port\n\n// USDC Configuration\nconst usdcAddress = process.env.USDC_ADDRESS; // USDC contract address on Pharos\nconst usdcName = process.env.USDC_NAME || \"USDC\";\n\n// === Initialize Client and Resource Server ===\nconst facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });\nconst resourceServer = new x402ResourceServer(facilitatorClient);\n\n// === Create EVM Payment Scheme and Register Custom Amount Parser ===\nconst evmScheme = new ExactEvmScheme();\n// Convert USD amount to USDC (6 decimals precision)\nevmScheme.registerMoneyParser(async (amount: number, network: string) => {\n  if (network === \"eip155:1672\") {\n    return {\n      amount: Math.round(amount * 1e6).toString(), // Convert to integer string (e.g., 0.01 → \"10000\")\n      asset: usdcAddress,                          // USDC contract address\n      extra: {\n        token: usdcName,\n        name: usdcName,\n        version: \"2\",\n      },\n    };\n  }\n  return null;\n});\n// Register Pharos Pacific Mainnet (Chain ID: 1672)\nresourceServer.register(\"eip155:1672\", evmScheme);\n\n// === Create Express App ===\nconst app = express();\n\n// Use payment middleware to protect routes\napp.use(\n  paymentMiddleware(\n    {\n      // Premium endpoint: $0.01\n      \"GET /data\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.01\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Paid data endpoint\",\n        mimeType: \"application/json\",\n      },\n// Low-cost endpoint: $0.005\n      \"GET /api/info\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.005\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Low-cost info endpoint\",\n        mimeType: \"application/json\",\n      },\n    },\n    resourceServer\n  )\n);\n\n// === Protected Business Endpoints ===\napp.get(\"/data\", (req, res) => {\n  res.json({ message: \"Hello, paid user!\", timestamp: Date.now() });\n});\napp.get(\"/api/info\", (req, res) => {\n  res.json({\n    name: \"Pharos x402 Server\",\n    network: \"Pharos Pacific Mainnet\",\n    chainId: 1672,\n    timestamp: Date.now(),\n  });\n});\n\n// === Health Check (No Payment Required) ===\napp.get(\"/health\", (req, res) => {\n  res.json({ status: \"ok\" });\n});\n// === Start Server ===\napp.listen(port, () => {\n  console.log(`✅ Server started, listening on http://localhost:${port}`);\n  console.log(`📡 Network: Pharos Pacific Mainnet (Chain ID: 1672)`);\n  console.log(`💰 Payment receiver address: ${payToAddress}`);\n  console.log(`🪙 USDC contract: ${usdcAddress}`);\n});\n\n```"
+      },
+      {
+        "id": "docs-2",
+        "title": "JSON-RPC API Methods",
+        "url": "https://docs.pharos.xyz/api-and-sdk/json-rpc-methods",
+        "retrievedAt": "2026-10-23T10:53:10.411Z",
+        "excerpt": "### eth_getCode\n\nReturns the contract code at a given address.\n\n* Input:\n  * `String` - Address to query\n  * `String` - Block number or tag\n* Output: `String` - Contract bytecode as hexadecimal\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getCode\",\n  \"params\": [\n    \"0x4100000000000000000000000000000000000000\",\n    \"latest\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"id\": 1,\n  \"jsonrpc\": \"2.0\",\n  \"result\": \"0x6080604052600a6012565b6022565b5f90565b6018600e565b50601f60b5565b...\"\n}\n```\n\n### eth_getBlockByNumber\n\nReturns information about a block by its number.\n\n* Input:\n  * `String` - Block number or tag\n  * `Boolean` - If `true`, returns full transaction objects\n* Output: `Object` - Block information\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getBlockByNumber\",\n  \"params\": [\n    \"0x2710\",\n    false\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"id\": 1,\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\n    \"baseFeePerGas\": \"0x2540be400\",\n    \"difficulty\": \"0x0\",\n    \"extraData\": \"0x0a0000010000003cc91a139b010000e3b0c44298fc1c149afbf4c8996fb92427...\",\n    \"gasLimit\": \"0x3b9aca00\",\n    \"gasUsed\": \"0x0\",\n    \"hash\": \"0xfa15419fc3de49e2...\",\n    \"logsBloom\": \"0x0000000000000000000000000000000000000000000000000000000000000000...\",\n    \"miner\": \"0x0000000000000000000000000000000000000000\",\n    \"mixHash\": \"0x0000000000000000...\",\n    \"nonce\": \"0x0000000000000000\",\n    \"number\": \"0x2710\",\n    \"parentHash\": \"0x1ff0db61e7c714a9...\",\n    \"receiptsRoot\": \"0x56e81f171bcc55a6...\",\n    \"sha3Uncles\": \"0x1dcc4de8dec75d7a...\",\n    \"size\": \"0x257\",\n    \"stateRoot\": \"0xc5914a0db9663398...\",\n    \"timestamp\": \"0x693c2fd1\",\n    \"totalDifficulty\": \"0x0\",\n    \"transactions\": [],\n    \"transactionsRoot\": \"0x56e81f171bcc55a6...\",\n    \"uncles\": []\n  }\n}\n```"
+      },
+      {
+        "id": "docs-3",
+        "title": "Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/getting-started/network/pacific-mainnet",
+        "retrievedAt": "2026-10-23T10:53:10.411Z",
+        "excerpt": "## Network Information\n\n| Parameter          | Value                        |\n| ------------------ | ---------------------------- |\n| Network            | Pharos Pacific Mainnet       |\n| ChainID            | 1672                         |\n| Coin Symbol/Ticker | PROS                         |\n| RPC URL            | <https://rpc.pharos.xyz>     |\n| Block Explorer     | <https://www.pharosscan.xyz> |\n\n> For the current node binary and Docker image versions, see [Current Node Versions](/node-and-validator-guide/validator-node-deployment#current-node-versions)."
+      }
+    ],
+    "support": {
+      "network": {
+        "supported": true,
+        "sourceIds": [
+          "docs-1",
+          "docs-3"
+        ]
+      },
+      "eth_getBalance": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getBlockByNumber": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getCode": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_call": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionByHash": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionReceipt": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_name": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_symbol": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_decimals": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_balanceOf": {
+        "supported": false,
+        "sourceIds": []
+      }
+    },
+    "covered": true,
+    "refused": false,
+    "requiredOperations": [
+      "network",
+      "eth_getCode",
+      "eth_getBlockByNumber"
+    ],
+    "missingOperations": []
+  },
+  "plan": {
+    "status": "PLANNED",
+    "steps": [
+      {
+        "id": "step-1",
+        "purpose": "Verify Pacific Mainnet and pin a block.",
+        "tool": "get_chain_info",
+        "arguments": {},
+        "expected": "chainId 1672",
+        "verification": "Compare with cited docs.",
+        "sourceIds": [
+          "docs-1",
+          "docs-3"
+        ],
+        "requiredInputs": {
+          "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-2",
+        "purpose": "Read deployed contract bytecode at the pinned block.",
+        "tool": "get_code",
+        "arguments": {
+          "address": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "block": "<pinned>"
+        },
+        "expected": "A hexadecimal bytecode result",
+        "verification": "Distinguish non-empty code from a successful empty-code read.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-3",
+        "purpose": "Verify the pinned block independently.",
+        "tool": "get_block",
+        "arguments": {
+          "block": "<pinned>",
+          "includeTransactions": false
+        },
+        "expected": "Matching block number and timestamp",
+        "verification": "Block number must match the code read block.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      }
+    ]
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "stepId": "step-1",
+      "tool": "get_chain_info",
+      "arguments": {},
+      "startedAt": "2026-10-23T10:53:39.343Z",
+      "completedAt": "2026-10-23T10:53:39.552Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 2,
+      "stepId": "step-2",
+      "tool": "get_code",
+      "arguments": {
+        "address": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "block": "21018010"
+      },
+      "startedAt": "2026-10-23T10:53:39.552Z",
+      "completedAt": "2026-10-23T10:53:40.246Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 3,
+      "stepId": "step-3",
+      "tool": "get_block",
+      "arguments": {
+        "block": "21018010",
+        "includeTransactions": false
+      },
+      "startedAt": "2026-10-23T10:53:40.246Z",
+      "completedAt": "2026-10-23T10:53:40.439Z",
+      "status": "SUCCEEDED"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "chain-id",
+      "stepId": "step-1",
+      "status": "VERIFIED",
+      "expected": 1672,
+      "actual": 1672
+    },
+    {
+      "id": "code-read",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": "DEPLOYED_BYTECODE"
+    },
+    {
+      "id": "pinned-block",
+      "stepId": "step-3",
+      "status": "VERIFIED",
+      "expected": "21018010",
+      "actual": "21018010"
+    }
+  ],
+  "result": {
+    "classification": "READ_VERIFIED",
+    "workflow": "contract_code",
+    "chainId": 1672,
+    "blockNumber": "21018010",
+    "blockTimestamp": 1792752817,
+    "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+    "hasDeployedCode": true,
+    "codeSizeBytes": 1798
+  },
+  "status": "VERIFIED",
+  "error": null,
+  "createdAt": "2026-10-23T10:53:36.890Z",
+  "updatedAt": "2026-10-23T10:53:41.120Z",
+  "historical": true
+}

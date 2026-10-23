@@ -1,0 +1,49 @@
+{
+  "evidenceVersion": "1.1",
+  "engineVersion": "doc-grounded-builder/1.1.0-doc-coverage",
+  "capturedAt": "2026-10-23T10:52:41.638Z",
+  "base": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev",
+  "readOnly": true,
+  "runs": [
+    {
+      "name": "native",
+      "id": "b44036e3-ab1b-41d6-8ef4-e5cea67d3b29",
+      "status": "VERIFIED",
+      "file": "v1.1-live-native.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/v1.1-live-native.json",
+      "sourceCount": 2,
+      "toolCalls": 3,
+      "refused": false
+    },
+    {
+      "name": "contract-code",
+      "id": "78867ff2-0bcd-4698-af4b-62e54dadb6eb",
+      "status": "VERIFIED",
+      "file": "v1.1-live-contract-code.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/v1.1-live-contract-code.json",
+      "sourceCount": 3,
+      "toolCalls": 3,
+      "refused": false
+    },
+    {
+      "name": "transaction",
+      "id": "113811cd-2f5e-4cb1-a104-a00546e99849",
+      "status": "VERIFIED",
+      "file": "v1.1-live-transaction.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/v1.1-live-transaction.json",
+      "sourceCount": 2,
+      "toolCalls": 4,
+      "refused": false
+    },
+    {
+      "name": "erc20-refusal",
+      "id": "35d0ebbb-7bfc-4b4a-86b9-2b8543947d14",
+      "status": "DOCS_NOT_COVERED",
+      "file": "v1.1-live-erc20-refusal.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/v1.1-live-erc20-refusal.json",
+      "sourceCount": 2,
+      "toolCalls": 0,
+      "refused": true
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "evidenceVersion": "1.1",
+  "engineVersion": "doc-grounded-builder/1.1.0-doc-coverage",
+  "id": "35d0ebbb-7bfc-4b4a-86b9-2b8543947d14",
+  "requestKey": "v1.1-erc20-refusal-4b4d2809-b288-4183-a996-3e0126837cb3",
+  "request": "How do I inspect ERC-20 token 0xc879c018db60520f4355c26ed1a6d572cdac1815 metadata and the token balance of wallet 0x15ddce897d76ac39c188ade4d353711a60395315?",
+  "intent": "erc20_balance",
+  "parameters": {
+    "token": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+    "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315",
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T10:54:07.673Z",
+    "attempt": 1,
+    "queries": [
+      "Pharos Pacific Mainnet chain ID 1672 RPC",
+      "Pharos JSON-RPC eth_getCode eth_call",
+      "Pharos ERC-20 name symbol decimals balanceOf contract interface",
+      "How do I inspect ERC-20 token 0xc879c018db60520f4355c26ed1a6d572cdac1815 metadata and the token balance of wallet 0x15ddce897d76ac39c188ade4d353711a60395315?"
+    ],
+    "answer": "DOCS\\_NOT\\_COVERED\n\nThe pages establish Pacific Mainnet (`eip155:1672`), provide the RPC endpoint, identify `0xc879c018db60520f4355c26ed1a6d572cdac1815` as the USDC contract address, and document generic `eth_getCode` and `eth_call` requests. See [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet) and [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods).\n\nThey do **not** explicitly document the ERC-20 calls `name`, `symbol`, `decimals`, or `balanceOf`, or provide their calldata or ABI. So these pages alone don’t fully specify how to inspect the token metadata and wallet balance without assuming method semantics.\n\n# Sources\n\n- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)\n- [Node Configuration](https://docs.pharos.xyz/node-and-validator-guide/validator-node-deployment/node-configuration)\n- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)\n- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)\n- [Call EVM From WASM](https://docs.pharos.xyz/developer-guide/interoperability/call-evm-from-wasm)\n- [eth_getProof — Storage State Verification (SPV)](https://docs.pharos.xyz/api-and-sdk/eth-getproof)\n- [RPC Infrastructure](https://docs.pharos.xyz/tooling-and-infrastructure/rpc)\n- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)\n- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)\n- [Canonical Contracts](https://docs.pharos.xyz/getting-started/canonical-contracts)\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)\n- [x402](https://docs.pharos.xyz/developer-guide/x402)\n- [Chainlink Data Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-ds)\n- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)\n- [Chainlink Push Engine Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-pe)\n- [Chainlink CCIP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/chainlink-ccip)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "x402 Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet",
+        "retrievedAt": "2026-10-23T10:54:07.673Z",
+        "excerpt": "## Server-side: Using Express + x402 Middleware\n\nFor Express applications, you can use the middleware pattern:\n\n```ts\n\n// Load .env environment variables\nimport { config } from \"dotenv\";\nconfig();\n// Import required modules\nimport express from \"express\";\nimport { paymentMiddleware, x402ResourceServer } from \"@x402/express\";\nimport { ExactEvmScheme } from \"@x402/evm/exact/server\";\nimport { HTTPFacilitatorClient } from \"@x402/core/server\";\n\n// === Environment Configuration ===\nconst payToAddress = process.env.PAY_TO_ADDRESS as `0x${string}`;\nif (!payToAddress) {\n  console.error(\"❌ Please set the PAY_TO_ADDRESS environment variable\");\n  console.error('Example: export PAY_TO_ADDRESS=0xYourAddressHere');\n  process.exit(1);\n  }\n  const facilitatorUrl = process.env.FACILITATOR_URL; // Facilitator service URL\nconst port = parseInt(process.env.PORT || \"4021\", 10); // Listening port\n\n// USDC Configuration\nconst usdcAddress = process.env.USDC_ADDRESS; // USDC contract address on Pharos\nconst usdcName = process.env.USDC_NAME || \"USDC\";\n\n// === Initialize Client and Resource Server ===\nconst facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });\nconst resourceServer = new x402ResourceServer(facilitatorClient);\n\n// === Create EVM Payment Scheme and Register Custom Amount Parser ===\nconst evmScheme = new ExactEvmScheme();\n// Convert USD amount to USDC (6 decimals precision)\nevmScheme.registerMoneyParser(async (amount: number, network: string) => {\n  if (network === \"eip155:1672\") {\n    return {\n      amount: Math.round(amount * 1e6).toString(), // Convert to integer string (e.g., 0.01 → \"10000\")\n      asset: usdcAddress,                          // USDC contract address\n      extra: {\n        token: usdcName,\n        name: usdcName,\n        version: \"2\",\n      },\n    };\n  }\n  return null;\n});\n// Register Pharos Pacific Mainnet (Chain ID: 1672)\nresourceServer.register(\"eip155:1672\", evmScheme);\n\n// === Create Express App ===\nconst app = express();\n\n// Use payment middleware to protect routes\napp.use(\n  paymentMiddleware(\n    {\n      // Premium endpoint: $0.01\n      \"GET /data\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.01\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Paid data endpoint\",\n        mimeType: \"application/json\",\n      },\n// Low-cost endpoint: $0.005\n      \"GET /api/info\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.005\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Low-cost info endpoint\",\n        mimeType: \"application/json\",\n      },\n    },\n    resourceServer\n  )\n);\n\n// === Protected Business Endpoints ===\napp.get(\"/data\", (req, res) => {\n  res.json({ message: \"Hello, paid user!\", timestamp: Date.now() });\n});\napp.get(\"/api/info\", (req, res) => {\n  res.json({\n    name: \"Pharos x402 Server\",\n    network: \"Pharos Pacific Mainnet\",\n    chainId: 1672,\n    timestamp: Date.now(),\n  });\n});\n\n// === Health Check (No Payment Required) ===\napp.get(\"/health\", (req, res) => {\n  res.json({ status: \"ok\" });\n});\n// === Start Server ===\napp.listen(port, () => {\n  console.log(`✅ Server started, listening on http://localhost:${port}`);\n  console.log(`📡 Network: Pharos Pacific Mainnet (Chain ID: 1672)`);\n  console.log(`💰 Payment receiver address: ${payToAddress}`);\n  console.log(`🪙 USDC contract: ${usdcAddress}`);\n});\n\n```"
+      },
+      {
+        "id": "docs-2",
+        "title": "JSON-RPC API Methods",
+        "url": "https://docs.pharos.xyz/api-and-sdk/json-rpc-methods",
+        "retrievedAt": "2026-10-23T10:54:07.673Z",
+        "excerpt": "### eth_getCode\n\nReturns the contract code at a given address.\n\n* Input:\n  * `String` - Address to query\n  * `String` - Block number or tag\n* Output: `String` - Contract bytecode as hexadecimal\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getCode\",\n  \"params\": [\n    \"0x4100000000000000000000000000000000000000\",\n    \"latest\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"id\": 1,\n  \"jsonrpc\": \"2.0\",\n  \"result\": \"0x6080604052600a6012565b6022565b5f90565b6018600e565b50601f60b5565b...\"\n}\n```\n\n### eth_call\n\nExecutes a message call without creating a transaction. Useful for reading contract state.\n\n* Input:\n  * `Object` - Transaction call object (from, to, gas, gasPrice, value, data)\n  * `String` - Block number or tag\n* Output: `String` - Return data as hexadecimal\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_call\",\n  \"params\": [\n    {\n      \"to\": \"0x4100000000000000000000000000000000000000\",\n      \"data\": \"0x76671808\"\n    },\n    \"latest\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0000000000000000...\"}\n```"
+      }
+    ],
+    "support": {
+      "network": {
+        "supported": true,
+        "sourceIds": [
+          "docs-1"
+        ]
+      },
+      "eth_getBalance": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getBlockByNumber": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getCode": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_call": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getTransactionByHash": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionReceipt": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_name": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_symbol": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_decimals": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_balanceOf": {
+        "supported": false,
+        "sourceIds": []
+      }
+    },
+    "covered": false,
+    "refused": true,
+    "requiredOperations": [
+      "network",
+      "eth_getCode",
+      "eth_call",
+      "erc20_name",
+      "erc20_symbol",
+      "erc20_decimals",
+      "erc20_balanceOf"
+    ],
+    "missingOperations": [
+      "erc20_name",
+      "erc20_symbol",
+      "erc20_decimals",
+      "erc20_balanceOf"
+    ]
+  },
+  "plan": {
+    "status": "DOCS_NOT_COVERED",
+    "reason": "Retrieved official documentation did not support every material operation. Docs MCP explicitly refused coverage. Missing: erc20_name, erc20_symbol, erc20_decimals, erc20_balanceOf.",
+    "steps": []
+  },
+  "trace": [],
+  "assertions": [],
+  "result": null,
+  "status": "DOCS_NOT_COVERED",
+  "error": null,
+  "createdAt": "2026-10-23T10:54:29.028Z",
+  "updatedAt": "2026-10-23T10:54:29.028Z",
+  "historical": true
+}

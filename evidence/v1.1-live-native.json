@@ -1,0 +1,252 @@
+{
+  "evidenceVersion": "1.1",
+  "engineVersion": "doc-grounded-builder/1.1.0-doc-coverage",
+  "id": "b44036e3-ab1b-41d6-8ef4-e5cea67d3b29",
+  "requestKey": "v1.1-native-7d4f86b1-cfcc-4175-bb01-5c464dbdc15b",
+  "request": "How do I check the native wallet balance of 0x15ddce897d76ac39c188ade4d353711a60395315 on Pharos Pacific Mainnet?",
+  "intent": "native_balance",
+  "parameters": {
+    "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315",
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T10:52:44.611Z",
+    "attempt": 1,
+    "queries": [
+      "Pharos Pacific Mainnet chain ID 1672 RPC",
+      "Pharos JSON-RPC eth_getBalance eth_getBlockByNumber",
+      "How do I check the native wallet balance of 0x15ddce897d76ac39c188ade4d353711a60395315 on Pharos Pacific Mainnet?"
+    ],
+    "answer": "COVERED — Pacific Mainnet’s RPC endpoint is `https://rpc.pharos.xyz` (chain ID `1672`). The JSON-RPC reference documents both required methods. See [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet) and [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods).\n\n1. Get the latest block number:\n\n   ```bash\n   curl -s https://rpc.pharos.xyz \\\n     -H 'Content-Type: application/json' \\\n     -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBlockByNumber\",\"params\":[\"latest\",false],\"id\":1}'\n   ```\n2. Use the returned `result.number` to query the wallet balance at that block:\n\n   ```bash\n   curl -s https://rpc.pharos.xyz \\\n     -H 'Content-Type: application/json' \\\n     -d '{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"0x15ddce897d76ac39c188ade4d353711a60395315\",\"<result.number>\"],\"id\":1}'\n   ```\n\nThe balance result is hexadecimal Wei. The mainnet configuration identifies PROS as the native currency with 18 decimals.\n\n# Sources\n\n- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [eth_getProof — Storage State Verification (SPV)](https://docs.pharos.xyz/api-and-sdk/eth-getproof)\n- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)\n- [Node Configuration](https://docs.pharos.xyz/node-and-validator-guide/validator-node-deployment/node-configuration)\n- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)\n- [RPC Infrastructure](https://docs.pharos.xyz/tooling-and-infrastructure/rpc)\n- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)\n- [Chainlink Push Engine Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-pe)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "x402 Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet",
+        "retrievedAt": "2026-10-23T10:52:44.611Z",
+        "excerpt": "## Server-side: Using Express + x402 Middleware\n\nFor Express applications, you can use the middleware pattern:\n\n```ts\n\n// Load .env environment variables\nimport { config } from \"dotenv\";\nconfig();\n// Import required modules\nimport express from \"express\";\nimport { paymentMiddleware, x402ResourceServer } from \"@x402/express\";\nimport { ExactEvmScheme } from \"@x402/evm/exact/server\";\nimport { HTTPFacilitatorClient } from \"@x402/core/server\";\n\n// === Environment Configuration ===\nconst payToAddress = process.env.PAY_TO_ADDRESS as `0x${string}`;\nif (!payToAddress) {\n  console.error(\"❌ Please set the PAY_TO_ADDRESS environment variable\");\n  console.error('Example: export PAY_TO_ADDRESS=0xYourAddressHere');\n  process.exit(1);\n  }\n  const facilitatorUrl = process.env.FACILITATOR_URL; // Facilitator service URL\nconst port = parseInt(process.env.PORT || \"4021\", 10); // Listening port\n\n// USDC Configuration\nconst usdcAddress = process.env.USDC_ADDRESS; // USDC contract address on Pharos\nconst usdcName = process.env.USDC_NAME || \"USDC\";\n\n// === Initialize Client and Resource Server ===\nconst facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });\nconst resourceServer = new x402ResourceServer(facilitatorClient);\n\n// === Create EVM Payment Scheme and Register Custom Amount Parser ===\nconst evmScheme = new ExactEvmScheme();\n// Convert USD amount to USDC (6 decimals precision)\nevmScheme.registerMoneyParser(async (amount: number, network: string) => {\n  if (network === \"eip155:1672\") {\n    return {\n      amount: Math.round(amount * 1e6).toString(), // Convert to integer string (e.g., 0.01 → \"10000\")\n      asset: usdcAddress,                          // USDC contract address\n      extra: {\n        token: usdcName,\n        name: usdcName,\n        version: \"2\",\n      },\n    };\n  }\n  return null;\n});\n// Register Pharos Pacific Mainnet (Chain ID: 1672)\nresourceServer.register(\"eip155:1672\", evmScheme);\n\n// === Create Express App ===\nconst app = express();\n\n// Use payment middleware to protect routes\napp.use(\n  paymentMiddleware(\n    {\n      // Premium endpoint: $0.01\n      \"GET /data\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.01\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Paid data endpoint\",\n        mimeType: \"application/json\",\n      },\n// Low-cost endpoint: $0.005\n      \"GET /api/info\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.005\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Low-cost info endpoint\",\n        mimeType: \"application/json\",\n      },\n    },\n    resourceServer\n  )\n);\n\n// === Protected Business Endpoints ===\napp.get(\"/data\", (req, res) => {\n  res.json({ message: \"Hello, paid user!\", timestamp: Date.now() });\n});\napp.get(\"/api/info\", (req, res) => {\n  res.json({\n    name: \"Pharos x402 Server\",\n    network: \"Pharos Pacific Mainnet\",\n    chainId: 1672,\n    timestamp: Date.now(),\n  });\n});\n\n// === Health Check (No Payment Required) ===\napp.get(\"/health\", (req, res) => {\n  res.json({ status: \"ok\" });\n});\n// === Start Server ===\napp.listen(port, () => {\n  console.log(`✅ Server started, listening on http://localhost:${port}`);\n  console.log(`📡 Network: Pharos Pacific Mainnet (Chain ID: 1672)`);\n  console.log(`💰 Payment receiver address: ${payToAddress}`);\n  console.log(`🪙 USDC contract: ${usdcAddress}`);\n});\n\n```"
+      },
+      {
+        "id": "docs-2",
+        "title": "JSON-RPC API Methods",
+        "url": "https://docs.pharos.xyz/api-and-sdk/json-rpc-methods",
+        "retrievedAt": "2026-10-23T10:52:44.611Z",
+        "excerpt": "### eth_getBalance\n\nReturns the balance of an address at a given block.\n\n* Input:\n  * `String` - Address to query\n  * `String` - Block number or tag (`latest`, `earliest`, `pending`, `safe`, `finalized`)\n* Output: `String` - Balance in Wei as hexadecimal\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getBalance\",\n  \"params\": [\n    \"0x407d73d8a49eeb85d32cf465507dd71d507100c1\",\n    \"latest\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0234c8a3397aab58\"}\n```\n\n### eth_getBlockByNumber\n\nReturns information about a block by its number.\n\n* Input:\n  * `String` - Block number or tag\n  * `Boolean` - If `true`, returns full transaction objects\n* Output: `Object` - Block information\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getBlockByNumber\",\n  \"params\": [\n    \"0x2710\",\n    false\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"id\": 1,\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\n    \"baseFeePerGas\": \"0x2540be400\",\n    \"difficulty\": \"0x0\",\n    \"extraData\": \"0x0a0000010000003cc91a139b010000e3b0c44298fc1c149afbf4c8996fb92427...\",\n    \"gasLimit\": \"0x3b9aca00\",\n    \"gasUsed\": \"0x0\",\n    \"hash\": \"0xfa15419fc3de49e2...\",\n    \"logsBloom\": \"0x0000000000000000000000000000000000000000000000000000000000000000...\",\n    \"miner\": \"0x0000000000000000000000000000000000000000\",\n    \"mixHash\": \"0x0000000000000000...\",\n    \"nonce\": \"0x0000000000000000\",\n    \"number\": \"0x2710\",\n    \"parentHash\": \"0x1ff0db61e7c714a9...\",\n    \"receiptsRoot\": \"0x56e81f171bcc55a6...\",\n    \"sha3Uncles\": \"0x1dcc4de8dec75d7a...\",\n    \"size\": \"0x257\",\n    \"stateRoot\": \"0xc5914a0db9663398...\",\n    \"timestamp\": \"0x693c2fd1\",\n    \"totalDifficulty\": \"0x0\",\n    \"transactions\": [],\n    \"transactionsRoot\": \"0x56e81f171bcc55a6...\",\n    \"uncles\": []\n  }\n}\n```"
+      }
+    ],
+    "support": {
+      "network": {
+        "supported": true,
+        "sourceIds": [
+          "docs-1"
+        ]
+      },
+      "eth_getBalance": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getBlockByNumber": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getCode": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_call": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionByHash": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionReceipt": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_name": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_symbol": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_decimals": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_balanceOf": {
+        "supported": false,
+        "sourceIds": []
+      }
+    },
+    "covered": true,
+    "refused": false,
+    "requiredOperations": [
+      "network",
+      "eth_getBalance",
+      "eth_getBlockByNumber"
+    ],
+    "missingOperations": []
+  },
+  "plan": {
+    "status": "PLANNED",
+    "steps": [
+      {
+        "id": "step-1",
+        "purpose": "Verify Pacific Mainnet identity and pin a block.",
+        "tool": "get_chain_info",
+        "arguments": {},
+        "expected": "chainId 1672 and a latest block",
+        "verification": "Compare MCP identity with the cited Pacific Mainnet documentation.",
+        "sourceIds": [
+          "docs-1"
+        ],
+        "requiredInputs": {
+          "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-2",
+        "purpose": "Read the wallet native balance at the pinned block.",
+        "tool": "get_balance",
+        "arguments": {
+          "address": "0x15ddce897d76ac39c188ade4d353711a60395315",
+          "block": "<pinned>"
+        },
+        "expected": "Exact balanceWei",
+        "verification": "Validate unsigned integer and format with 18 decimals.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-3",
+        "purpose": "Verify the pinned block independently.",
+        "tool": "get_block",
+        "arguments": {
+          "block": "<pinned>",
+          "includeTransactions": false
+        },
+        "expected": "Matching block number and timestamp",
+        "verification": "Block number must equal the balance read block.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      }
+    ]
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "stepId": "step-1",
+      "tool": "get_chain_info",
+      "arguments": {},
+      "startedAt": "2026-10-23T10:53:09.397Z",
+      "completedAt": "2026-10-23T10:53:09.599Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 2,
+      "stepId": "step-2",
+      "tool": "get_balance",
+      "arguments": {
+        "address": "0x15ddce897d76ac39c188ade4d353711a60395315",
+        "block": "21017974"
+      },
+      "startedAt": "2026-10-23T10:53:09.599Z",
+      "completedAt": "2026-10-23T10:53:09.787Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 3,
+      "stepId": "step-3",
+      "tool": "get_block",
+      "arguments": {
+        "block": "21017974",
+        "includeTransactions": false
+      },
+      "startedAt": "2026-10-23T10:53:09.787Z",
+      "completedAt": "2026-10-23T10:53:09.967Z",
+      "status": "SUCCEEDED"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "chain-id",
+      "stepId": "step-1",
+      "status": "VERIFIED",
+      "expected": 1672,
+      "actual": 1672
+    },
+    {
+      "id": "balance-integer",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": "182718836461531768767"
+    },
+    {
+      "id": "pinned-block",
+      "stepId": "step-3",
+      "status": "VERIFIED",
+      "expected": "21017974",
+      "actual": "21017974"
+    }
+  ],
+  "result": {
+    "classification": "READ_VERIFIED",
+    "workflow": "native_balance",
+    "chainId": 1672,
+    "blockNumber": "21017974",
+    "blockTimestamp": 1792752787,
+    "wallet": "0x15ddce897d76ac39c188ade4d353711a60395315",
+    "balanceRaw": "182718836461531768767",
+    "balance": "182.718836461531768767",
+    "decimals": 18,
+    "symbol": "PROS"
+  },
+  "status": "VERIFIED",
+  "error": null,
+  "createdAt": "2026-10-23T10:53:06.482Z",
+  "updatedAt": "2026-10-23T10:53:10.134Z",
+  "historical": true
+}

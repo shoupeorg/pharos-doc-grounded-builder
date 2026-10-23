@@ -1,0 +1,274 @@
+{
+  "evidenceVersion": "1.1",
+  "engineVersion": "doc-grounded-builder/1.1.0-doc-coverage",
+  "id": "113811cd-2f5e-4cb1-a104-a00546e99849",
+  "requestKey": "v1.1-transaction-85fc6557-12a7-426e-aaa5-90a5af971166",
+  "request": "How do I verify whether transaction 0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399 succeeded and inspect its block and gas?",
+  "intent": "transaction_receipt",
+  "parameters": {
+    "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399",
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T10:53:41.649Z",
+    "attempt": 1,
+    "queries": [
+      "Pharos Pacific Mainnet chain ID 1672 RPC",
+      "Pharos JSON-RPC eth_getTransactionByHash eth_getTransactionReceipt eth_getBlockByNumber gasUsed effectiveGasPrice",
+      "How do I verify whether transaction 0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399 succeeded and inspect its block and gas?"
+    ],
+    "answer": "COVERED\n\nUse Pharos Pacific Mainnet’s RPC endpoint, `https://rpc.pharos.xyz`. The [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet) identifies the network as chain ID `1672`. The [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods) documents all three query methods.\n\nFirst request the transaction details:\n\n```json\n{\"jsonrpc\":\"2.0\",\"method\":\"eth_getTransactionByHash\",\"params\":[\"0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399\"],\"id\":1}\n```\n\nThen request its receipt using the same hash:\n\n```json\n{\"jsonrpc\":\"2.0\",\"method\":\"eth_getTransactionReceipt\",\"params\":[\"0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399\"],\"id\":2}\n```\n\nThe documented receipt fields include `status`, `blockNumber`, and `gasUsed`. Use the returned `blockNumber` to fetch the block:\n\n```json\n{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBlockByNumber\",\"params\":[\"<blockNumber from receipt>\",false],\"id\":3}\n```\n\nThe block response includes block-level `gasUsed`. The transaction response’s `gas` field is also available; the page does not define it as gas consumed. The docs show a receipt with `status: \"0x1\"` but do not explain the status values’ success/failure meaning, so they do not establish that interpretation.\n\n# Sources\n\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [x402](https://docs.pharos.xyz/developer-guide/x402)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)\n- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)\n- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)\n- [Canonical Contracts](https://docs.pharos.xyz/getting-started/canonical-contracts)\n- [Get PROS Gas](https://docs.pharos.xyz/getting-started/get-pros-gas)\n- [Token Registry](https://docs.pharos.xyz/getting-started/token-registry)\n- [Atlantic Testnet](https://docs.pharos.xyz/getting-started/network/atlantic-testnet)\n- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)\n- [eth_getProof — Storage State Verification (SPV)](https://docs.pharos.xyz/api-and-sdk/eth-getproof)\n- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)\n- [Node Configuration](https://docs.pharos.xyz/node-and-validator-guide/validator-node-deployment/node-configuration)\n- [RPC Infrastructure](https://docs.pharos.xyz/tooling-and-infrastructure/rpc)\n- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)\n- [Enable AutoPruning in Pharos Node](https://docs.pharos.xyz/enable-pruning-in-pharos-node)\n- [Nirvana RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/nirvana)\n- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)\n- [Pharos Testnet: Rebuild Node with Preserved Node Info](https://docs.pharos.xyz/pharos-testnet-rebuild-node-with-preserved-node-info)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "x402 Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet",
+        "retrievedAt": "2026-10-23T10:53:41.649Z",
+        "excerpt": "## Server-side: Using Express + x402 Middleware\n\nFor Express applications, you can use the middleware pattern:\n\n```ts\n\n// Load .env environment variables\nimport { config } from \"dotenv\";\nconfig();\n// Import required modules\nimport express from \"express\";\nimport { paymentMiddleware, x402ResourceServer } from \"@x402/express\";\nimport { ExactEvmScheme } from \"@x402/evm/exact/server\";\nimport { HTTPFacilitatorClient } from \"@x402/core/server\";\n\n// === Environment Configuration ===\nconst payToAddress = process.env.PAY_TO_ADDRESS as `0x${string}`;\nif (!payToAddress) {\n  console.error(\"❌ Please set the PAY_TO_ADDRESS environment variable\");\n  console.error('Example: export PAY_TO_ADDRESS=0xYourAddressHere');\n  process.exit(1);\n  }\n  const facilitatorUrl = process.env.FACILITATOR_URL; // Facilitator service URL\nconst port = parseInt(process.env.PORT || \"4021\", 10); // Listening port\n\n// USDC Configuration\nconst usdcAddress = process.env.USDC_ADDRESS; // USDC contract address on Pharos\nconst usdcName = process.env.USDC_NAME || \"USDC\";\n\n// === Initialize Client and Resource Server ===\nconst facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });\nconst resourceServer = new x402ResourceServer(facilitatorClient);\n\n// === Create EVM Payment Scheme and Register Custom Amount Parser ===\nconst evmScheme = new ExactEvmScheme();\n// Convert USD amount to USDC (6 decimals precision)\nevmScheme.registerMoneyParser(async (amount: number, network: string) => {\n  if (network === \"eip155:1672\") {\n    return {\n      amount: Math.round(amount * 1e6).toString(), // Convert to integer string (e.g., 0.01 → \"10000\")\n      asset: usdcAddress,                          // USDC contract address\n      extra: {\n        token: usdcName,\n        name: usdcName,\n        version: \"2\",\n      },\n    };\n  }\n  return null;\n});\n// Register Pharos Pacific Mainnet (Chain ID: 1672)\nresourceServer.register(\"eip155:1672\", evmScheme);\n\n// === Create Express App ===\nconst app = express();\n\n// Use payment middleware to protect routes\napp.use(\n  paymentMiddleware(\n    {\n      // Premium endpoint: $0.01\n      \"GET /data\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.01\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Paid data endpoint\",\n        mimeType: \"application/json\",\n      },\n// Low-cost endpoint: $0.005\n      \"GET /api/info\": {\n        accepts: {\n          scheme: \"exact\",\n          price: \"0.005\",\n          network: \"eip155:1672\",\n          payTo: payToAddress,\n        },\n        description: \"Low-cost info endpoint\",\n        mimeType: \"application/json\",\n      },\n    },\n    resourceServer\n  )\n);\n\n// === Protected Business Endpoints ===\napp.get(\"/data\", (req, res) => {\n  res.json({ message: \"Hello, paid user!\", timestamp: Date.now() });\n});\napp.get(\"/api/info\", (req, res) => {\n  res.json({\n    name: \"Pharos x402 Server\",\n    network: \"Pharos Pacific Mainnet\",\n    chainId: 1672,\n    timestamp: Date.now(),\n  });\n});\n\n// === Health Check (No Payment Required) ===\napp.get(\"/health\", (req, res) => {\n  res.json({ status: \"ok\" });\n});\n// === Start Server ===\napp.listen(port, () => {\n  console.log(`✅ Server started, listening on http://localhost:${port}`);\n  console.log(`📡 Network: Pharos Pacific Mainnet (Chain ID: 1672)`);\n  console.log(`💰 Payment receiver address: ${payToAddress}`);\n  console.log(`🪙 USDC contract: ${usdcAddress}`);\n});\n\n```"
+      },
+      {
+        "id": "docs-2",
+        "title": "JSON-RPC API Methods",
+        "url": "https://docs.pharos.xyz/api-and-sdk/json-rpc-methods",
+        "retrievedAt": "2026-10-23T10:53:41.649Z",
+        "excerpt": "### eth_getTransactionByHash\n\nReturns information about a transaction by its hash.\n\n* Input:\n  * `String` - Transaction hash\n* Output: `Object` - Transaction details\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getTransactionByHash\",\n  \"params\": [\n    \"0xee093bb802e09fe6119e83d7fe35004464a98e69000bcd5672ac73b32172c997\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"result\": {\n    \"blockHash\": \"0x1d13424e6a78ab6d...\",\n    \"blockNumber\": \"0x4ff5de\",\n    \"chainId\": \"0x688\",\n    \"from\": \"0x7565f60988b83e577cb1a670ce577667311b11ae\",\n    \"gas\": \"0x1380a5\",\n    \"gasPrice\": \"0x2540be400\",\n    \"hash\": \"0xee093bb802e09fe6...\",\n    \"input\": \"0x6a76120200000000...\",\n    \"nonce\": \"0x66\",\n    \"r\": \"0xd7f06b78d1c679b4...\",\n    \"s\": \"0x74b4c81773e6d4f0...\",\n    \"to\": \"0xcce192445aa8118117e73554773e8be8617f31d0\",\n    \"transactionIndex\": \"0x0\",\n    \"type\": \"0x0\",\n    \"v\": \"0xd34\",\n    \"value\": \"0x0\"\n  }\n}\n```\n\n### eth_getTransactionReceipt\n\nReturns the receipt of a transaction by transaction hash.\n\n* Input:\n  * `String` - Transaction hash\n* Output: `Object` - Transaction receipt\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getTransactionReceipt\",\n  \"params\": [\n    \"0xee093bb802e09fe6119e83d7fe35004464a98e69000bcd5672ac73b32172c997\"\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"result\": {\n    \"blockHash\": \"0x1d13424e6a78ab6d...\",\n    \"blockNumber\": \"0x4ff5de\",\n    \"contractAddress\": null,\n    \"cumulativeGasUsed\": \"0xea376\",\n    \"effectiveGasPrice\": \"0x2540be400\",\n    \"from\": \"0x7565f60988b83e577cb1a670ce577667311b11ae\",\n    \"gasUsed\": \"0xea376\",\n    \"logs\": [\n      {\n        \"address\": \"...\",\n        \"blockHash\": \"...\",\n        \"blockNumber\": \"...\",\n        \"blockTimestamp\": \"...\",\n        \"data\": \"...\",\n        \"logIndex\": \"...\",\n        \"removed\": \"...\",\n        \"topics\": \"...\",\n        \"transactionHash\": \"...\",\n        \"transactionIndex\": \"...\"\n      },\n      {\n        \"address\": \"...\",\n        \"blockHash\": \"...\",\n        \"blockNumber\": \"...\",\n        \"blockTimestamp\": \"...\",\n        \"data\": \"...\",\n        \"logIndex\": \"...\",\n        \"removed\": \"...\",\n        \"topics\": \"...\",\n        \"transactionHash\": \"...\",\n        \"transactionIndex\": \"...\"\n      },\n      {\n        \"address\": \"...\",\n        \"blockHash\": \"...\",\n        \"blockNumber\": \"...\",\n        \"blockTimestamp\": \"...\",\n        \"data\": \"...\",\n        \"logIndex\": \"...\",\n        \"removed\": \"...\",\n        \"topics\": \"...\",\n        \"transactionHash\": \"...\",\n        \"transactionIndex\": \"...\"\n      }\n    ],\n    \"logsBloom\": \"0x0000000040000000...\",\n    \"status\": \"0x1\",\n    \"to\": \"0xcce192445aa8118117e73554773e8be8617f31d0\",\n    \"transactionHash\": \"0xee093bb802e09fe6...\",\n    \"transactionIndex\": \"0x0\",\n    \"type\": \"0x0\"\n  }\n}\n```\n\n### eth_getBlockByNumber\n\nReturns information about a block by its number.\n\n* Input:\n  * `String` - Block number or tag\n  * `Boolean` - If `true`, returns full transaction objects\n* Output: `Object` - Block information\n\n**Example:**\n\n```json\n// Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"eth_getBlockByNumber\",\n  \"params\": [\n    \"0x2710\",\n    false\n  ],\n  \"id\": 1\n}\n\n// Response\n{\n  \"id\": 1,\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\n    \"baseFeePerGas\": \"0x2540be400\",\n    \"difficulty\": \"0x0\",\n    \"extraData\": \"0x0a0000010000003cc91a139b010000e3b0c44298fc1c149afbf4c8996fb92427...\",\n    \"gasLimit\": \"0x3b9aca00\",\n    \"gasUsed\": \"0x0\",\n    \"hash\": \"0xfa15419fc3de49e2...\",\n    \"logsBloom\": \"0x0000000000000000000000000000000000000000000000000000000000000000...\",\n    \"miner\": \"0x0000000000000000000000000000000000000000\",\n    \"mixHash\": \"0x0000000000000000...\",\n    \"nonce\": \"0x0000000000000000\",\n    \"number\": \"0x2710\",\n    \"parentHash\": \"0x1ff0db61e7c714a9...\",\n    \"receiptsRoot\": \"0x56e81f171bcc55a6...\",\n    \"sha3Uncles\": \"0x1dcc4de8dec75d7a...\",\n    \"size\": \"0x257\",\n    \"stateRoot\": \"0xc5914a0db9663398...\",\n    \"timestamp\": \"0x693c2fd1\",\n    \"totalDifficulty\": \"0x0\",\n    \"transactions\": [],\n    \"transactionsRoot\": \"0x56e81f171bcc55a6...\",\n    \"uncles\": []\n  }\n}\n```"
+      }
+    ],
+    "support": {
+      "network": {
+        "supported": true,
+        "sourceIds": [
+          "docs-1"
+        ]
+      },
+      "eth_getBalance": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getBlockByNumber": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getCode": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_call": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "eth_getTransactionByHash": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "eth_getTransactionReceipt": {
+        "supported": true,
+        "sourceIds": [
+          "docs-2"
+        ]
+      },
+      "erc20_name": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_symbol": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_decimals": {
+        "supported": false,
+        "sourceIds": []
+      },
+      "erc20_balanceOf": {
+        "supported": false,
+        "sourceIds": []
+      }
+    },
+    "covered": true,
+    "refused": false,
+    "requiredOperations": [
+      "network",
+      "eth_getTransactionByHash",
+      "eth_getTransactionReceipt",
+      "eth_getBlockByNumber"
+    ],
+    "missingOperations": []
+  },
+  "plan": {
+    "status": "PLANNED",
+    "steps": [
+      {
+        "id": "step-1",
+        "purpose": "Verify Pacific Mainnet identity.",
+        "tool": "get_chain_info",
+        "arguments": {},
+        "expected": "chainId 1672",
+        "verification": "Compare with cited docs.",
+        "sourceIds": [
+          "docs-1"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-2",
+        "purpose": "Read transaction and receipt.",
+        "tool": "get_transaction + get_transaction_receipt",
+        "arguments": {
+          "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "expected": "Matching hashes and inclusion data",
+        "verification": "Reconcile transaction, receipt, chain ID, status, gas, and block.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-3",
+        "purpose": "Verify the inclusion block independently.",
+        "tool": "get_block",
+        "arguments": {
+          "block": "<receipt block>",
+          "includeTransactions": false
+        },
+        "expected": "Matching block hash/number",
+        "verification": "Receipt block must match the returned block.",
+        "sourceIds": [
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      }
+    ]
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "stepId": "step-1",
+      "tool": "get_chain_info",
+      "arguments": {},
+      "startedAt": "2026-10-23T10:54:05.324Z",
+      "completedAt": "2026-10-23T10:54:06.009Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 2,
+      "stepId": "step-2",
+      "tool": "get_transaction",
+      "arguments": {
+        "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+      },
+      "startedAt": "2026-10-23T10:54:06.009Z",
+      "completedAt": "2026-10-23T10:54:06.672Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 3,
+      "stepId": "step-2",
+      "tool": "get_transaction_receipt",
+      "arguments": {
+        "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+      },
+      "startedAt": "2026-10-23T10:54:06.009Z",
+      "completedAt": "2026-10-23T10:54:06.197Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 4,
+      "stepId": "step-3",
+      "tool": "get_block",
+      "arguments": {
+        "block": "20776323",
+        "includeTransactions": false
+      },
+      "startedAt": "2026-10-23T10:54:06.672Z",
+      "completedAt": "2026-10-23T10:54:06.852Z",
+      "status": "SUCCEEDED"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "chain-id",
+      "stepId": "step-1",
+      "status": "VERIFIED",
+      "expected": 1672,
+      "actual": 1672
+    },
+    {
+      "id": "hash-reconciliation",
+      "stepId": "step-2",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "transaction-chain",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": 1672
+    },
+    {
+      "id": "inclusion-block",
+      "stepId": "step-3",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "receipt-status",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": "SUCCEEDED"
+    }
+  ],
+  "result": {
+    "classification": "TRANSACTION_CONFIRMED",
+    "workflow": "transaction_receipt",
+    "chainId": 1672,
+    "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399",
+    "from": "0x15ddce897d76ac39c188ade4d353711a60395315",
+    "to": "0x869379f2d9df67891e0159dd2520dc1681908f10",
+    "blockNumber": "20776323",
+    "blockTimestamp": 1792527662,
+    "status": "SUCCEEDED",
+    "gasUsed": "129673",
+    "effectiveGasPrice": "15000000000"
+  },
+  "status": "VERIFIED",
+  "error": null,
+  "createdAt": "2026-10-23T10:54:02.425Z",
+  "updatedAt": "2026-10-23T10:54:07.022Z",
+  "historical": true
+}
