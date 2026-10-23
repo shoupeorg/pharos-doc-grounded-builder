@@ -9,10 +9,12 @@ The public UI, CLI, and root `SKILL.md` share the same engine. The router is det
 ## Supported workflows
 
 1. Native PROS wallet balance at a pinned block.
-2. Arbitrary ERC-20 bytecode, name, symbol, decimals, and wallet balance at a pinned block.
+2. Contract bytecode presence and size at a pinned block.
 3. Existing transaction receipt verification, including transaction/receipt hash reconciliation, chain ID, inclusion block, status, and historical gas fields when present.
 
-Every workflow retrieves official documentation through Developer Docs MCP before a plan can exist. Documentation sources establish the Pharos network and relevant documented contract/explorer context. The actual read method schema is discovered from Pharos Chain MCP. If retrieved pages do not cover the workflow and Pacific Mainnet assumptions, the run becomes `DOCS_NOT_COVERED` and no Chain MCP tool is invoked.
+Every workflow retrieves official documentation through Developer Docs MCP before a plan can exist. Coverage requires exact supporting excerpts for every material operation, including network identity and the relevant JSON-RPC methods. Markdown-escaped refusals fail closed. Broad words such as “token,” “contract,” or “network” never establish coverage. If any operation is not documented, the run becomes `DOCS_NOT_COVERED` and no Chain MCP tool is invoked.
+
+ERC-20 metadata/balance requests remain recognized, including explicit token and wallet roles in either order. They execute only when the retrieved official pages document `eth_getCode`, `eth_call`, and the `name()`, `symbol()`, `decimals()`, and `balanceOf(address)` semantics. Ambiguous address roles request clarification. Current official retrieval did not establish all four ABI operations, so the corrected live example is blocked rather than executed.
 
 ## Evidence semantics
 
@@ -74,7 +76,7 @@ The Worker uses Cloudflare D1 and static assets. Apply `migrations/0001_initial.
 
 ## Reviewer flow
 
-1. Choose `NATIVE BALANCE`, `ERC-20 INSPECTION`, or `VERIFY TRANSACTION`.
+1. Choose `NATIVE BALANCE`, `CONTRACT CODE`, or `VERIFY TRANSACTION`.
 2. Select `RETRIEVE DOCS & BUILD PLAN →`.
 3. Inspect `DOCS_MCP.SOURCES` and `GROUNDED_PLAN.JSON` before execution.
 4. Select `EXECUTE PLAN`.

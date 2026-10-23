@@ -11,7 +11,8 @@
     "cli": "node src/cli.js",
     "deploy": "npm run build && wrangler deploy --no-bundle",
     "db:migrate:remote": "wrangler d1 migrations apply pharos-doc-grounded-builder --remote",
-    "capture:evidence": "node scripts/capture-live-evidence.mjs"
+    "capture:evidence": "node scripts/capture-corrected-evidence.mjs",
+    "capture:evidence:v1.0-historical": "node scripts/capture-live-evidence.mjs"
   },
   "dependencies": { "@modelcontextprotocol/sdk": "1.32.1" },
   "devDependencies": {

@@ -5,7 +5,7 @@ description: Build cited, read-only Pharos Pacific Mainnet plans from official D
 
 # Pharos Doc-Grounded Builder
 
-Use this skill for supported read-only Pharos questions about native balances, ERC-20 metadata/balances, and existing transaction receipts.
+Use this skill for supported read-only Pharos questions about native balances, deployed contract bytecode, and existing transaction receipts. ERC-20 metadata/balance requests are recognized but must fail closed unless Docs MCP provides exact method and ABI support for every operation.
 
 ## Required sequence
 
