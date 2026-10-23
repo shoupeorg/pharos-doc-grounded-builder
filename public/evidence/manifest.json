@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-10-23T08:36:23.682Z",
+  "base": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev",
+  "readOnly": true,
+  "runs": [
+    {
+      "name": "native",
+      "id": "9de12a45-4ffd-4259-9797-7f938701ad18",
+      "status": "VERIFIED",
+      "file": "live-native.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/live-native.json",
+      "sourceCount": 1,
+      "toolCalls": 3
+    },
+    {
+      "name": "erc20",
+      "id": "1f66962f-9077-4850-8975-9d441ead5ce1",
+      "status": "VERIFIED",
+      "file": "live-erc20.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/live-erc20.json",
+      "sourceCount": 2,
+      "toolCalls": 6
+    },
+    {
+      "name": "transaction",
+      "id": "fe2fa097-3fb9-46a9-8cf6-e04f0c0934da",
+      "status": "VERIFIED",
+      "file": "live-transaction.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/live-transaction.json",
+      "sourceCount": 2,
+      "toolCalls": 4
+    },
+    {
+      "name": "unsupported",
+      "id": "fb1d2afb-f04c-488b-9e59-b2889bf4eb38",
+      "status": "DOCS_NOT_COVERED",
+      "file": "live-unsupported.json",
+      "publicUrl": "https://pharos-doc-grounded-builder.shoupeorg.workers.dev/evidence/live-unsupported.json",
+      "sourceCount": 1,
+      "toolCalls": 0
+    }
+  ]
+}

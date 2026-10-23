@@ -1,0 +1,41 @@
+{
+  "id": "fb1d2afb-f04c-488b-9e59-b2889bf4eb38",
+  "requestKey": "live-unsupported-3115c6b1-d064-41f5-a41a-176be3ca9077",
+  "request": "How do I bridge Bitcoin to Pharos and earn guaranteed yield?",
+  "intent": "unsupported",
+  "parameters": {
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T08:38:02.987Z",
+    "attempt": 1,
+    "query": "How do I bridge Bitcoin to Pharos and earn guaranteed yield? Pharos Pacific Mainnet official documentation",
+    "answer": "**DOCS\\_NOT\\_COVERED** — the available page does not document bridging Bitcoin to Pharos or earning guaranteed yield.\n\nThe [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet) covers EVM-based payments for services, not a Bitcoin bridge or yield product. Its example uses the `eip155:1672` network and USDC; it does not specify a Bitcoin-bridging contract, bridge transaction, or guaranteed-yield contract.\n\nThe documented network identity is [Pacific Mainnet](/getting-started/network/pacific-mainnet): chain ID `1672`, native coin `PROS`, RPC `https://rpc.pharos.xyz`, and explorer `https://www.pharosscan.xyz`. These are network details, not bridge or yield instructions.\n\n# Sources\n\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)\n- [x402](https://docs.pharos.xyz/developer-guide/x402)\n- [Chainlink Data Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-ds)\n- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)\n- [Chainlink Push Engine Feeds](https://docs.pharos.xyz/tooling-and-infrastructure/oracles/chainlink-pe)\n- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)\n- [Chainlink CCIP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/chainlink-ccip)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "x402 Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet",
+        "retrievedAt": "2026-10-23T08:38:02.987Z",
+        "excerpt": "# x402 Pacific Mainnet A developer guide on how to get started with x402 on Pharos Pacific Mainnet ## Server-side: Using Express + x402 Middleware For Express applications, you can use the middleware pattern: ```ts // Load .env environment variables import { config } from \"dotenv\"; config(); // Import required modules import express from \"express\"; import { paymentMiddleware, x402ResourceServer } from \"@x402/express\"; import { ExactEvmScheme } from \"@x402/evm/exact/server\"; import { HTTPFacilita"
+      }
+    ],
+    "covered": false
+  },
+  "plan": {
+    "status": "DOCS_NOT_COVERED",
+    "reason": "Retrieved official documentation did not support this workflow and network assumptions.",
+    "steps": []
+  },
+  "trace": [],
+  "assertions": [],
+  "result": null,
+  "status": "DOCS_NOT_COVERED",
+  "error": null,
+  "createdAt": "2026-10-23T08:38:17.514Z",
+  "updatedAt": "2026-10-23T08:38:17.514Z",
+  "historical": true
+}

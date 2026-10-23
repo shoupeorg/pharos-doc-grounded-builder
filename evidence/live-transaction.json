@@ -1,0 +1,209 @@
+{
+  "id": "fe2fa097-3fb9-46a9-8cf6-e04f0c0934da",
+  "requestKey": "live-transaction-0b9520fa-8075-43de-ae04-eeb3d519b999",
+  "request": "How do I verify whether transaction 0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399 succeeded and inspect its block and gas?",
+  "intent": "transaction_receipt",
+  "parameters": {
+    "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399",
+    "missing": [],
+    "router": "deterministic validated intent router"
+  },
+  "sources": {
+    "transport": "Developer Docs MCP",
+    "endpoint": "https://docs.pharos.xyz/~gitbook/mcp",
+    "retrievedAt": "2026-10-23T08:37:35.875Z",
+    "attempt": 1,
+    "query": "Pharos Pacific Mainnet explorer transaction receipt status block gas How do I verify whether transaction 0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399 succeeded and inspect its block and gas?",
+    "answer": "Use the [Pharos Pacific Mainnet explorer](https://www.pharosscan.xyz) to look up transaction `0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399`. The explorer is documented for checking transaction status and inspecting blocks and network activity. The [Pacific Mainnet](/getting-started/network/pacific-mainnet) identify the network as **Pharos Pacific Mainnet**, chain ID **1672**, with native ticker **PROS**.\n\nThe supplied pages do **not** document a `transaction_receipt` JSON-RPC method, receipt fields, or how to read gas values from a receipt. They also don’t specify whether the explorer displays gas for this transaction. **DOCS\\_NOT\\_COVERED** for those details, so I can’t confirm whether this transaction succeeded or report its block or gas from the provided documentation.\n\nThe [Block Explorer](/tooling-and-infrastructure/block-explorer) also describes contract inspection, but provides no contract-specific assumptions relevant to this transaction.\n\n# Sources\n\n- [Block Explorer](https://docs.pharos.xyz/tooling-and-infrastructure/block-explorer)\n- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)\n- [Hemera SocialScan](https://docs.pharos.xyz/tooling-and-infrastructure/block-explorer/hemera-socialscan)\n- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)\n- [Canonical Contracts](https://docs.pharos.xyz/getting-started/canonical-contracts)\n- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)\n- [Atlantic Testnet](https://docs.pharos.xyz/getting-started/network/atlantic-testnet)\n- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)\n- [Network](https://docs.pharos.xyz/getting-started/network)\n- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)",
+    "sources": [
+      {
+        "id": "docs-1",
+        "title": "Pacific Mainnet",
+        "url": "https://docs.pharos.xyz/getting-started/network/pacific-mainnet",
+        "retrievedAt": "2026-10-23T08:37:35.875Z",
+        "excerpt": "# Pacific Mainnet ## Network Information | Parameter | Value | | ------------------ | ---------------------------- | | Network | Pharos Pacific Mainnet | | ChainID | 1672 | | Coin Symbol/Ticker | PROS | | RPC URL | <https://rpc.pharos.xyz> | | Block Explorer | <https://www.pharosscan.xyz> | > For the current node binary and Docker image versions, see [Current Node Versions](/node-and-validator-guide/validator-node-deployment#current-node-versions)."
+      },
+      {
+        "id": "docs-2",
+        "title": "Block Explorer",
+        "url": "https://docs.pharos.xyz/tooling-and-infrastructure/block-explorer",
+        "retrievedAt": "2026-10-23T08:37:35.875Z",
+        "excerpt": "# Block Explorer ## Overview A block explorer is one of the most essential tools when building on Pharos. It gives you visibility into everything happening on-chain — from transactions and blocks to smart contracts and account activity. As a developer, you’ll frequently use a block explorer to verify deployments, debug issues, and track interactions with your contracts. ## What You Can Do with a Block Explorer * View transactions and check their status * Inspect blocks and network activity * Exp"
+      }
+    ],
+    "covered": true
+  },
+  "plan": {
+    "status": "PLANNED",
+    "steps": [
+      {
+        "id": "step-1",
+        "purpose": "Verify Pacific Mainnet identity.",
+        "tool": "get_chain_info",
+        "arguments": {},
+        "expected": "chainId 1672",
+        "verification": "Compare with cited docs.",
+        "sourceIds": [
+          "docs-1",
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-2",
+        "purpose": "Read transaction and receipt.",
+        "tool": "get_transaction + get_transaction_receipt",
+        "arguments": {
+          "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "expected": "Matching hashes and inclusion data",
+        "verification": "Reconcile transaction, receipt, chain ID, status, gas, and block.",
+        "sourceIds": [
+          "docs-1",
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      },
+      {
+        "id": "step-3",
+        "purpose": "Verify the inclusion block independently.",
+        "tool": "get_block",
+        "arguments": {
+          "block": "<receipt block>",
+          "includeTransactions": false
+        },
+        "expected": "Matching block hash/number",
+        "verification": "Receipt block must match the returned block.",
+        "sourceIds": [
+          "docs-1",
+          "docs-2"
+        ],
+        "requiredInputs": {
+          "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+        },
+        "network": {
+          "name": "Pharos Pacific Mainnet",
+          "chainId": 1672,
+          "nativeSymbol": "PROS",
+          "rpcUrl": "https://rpc.pharos.xyz",
+          "explorerUrl": "https://www.pharosscan.xyz"
+        },
+        "readOnly": true
+      }
+    ]
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "stepId": "step-1",
+      "tool": "get_chain_info",
+      "arguments": {},
+      "startedAt": "2026-10-23T08:38:00.950Z",
+      "completedAt": "2026-10-23T08:38:01.145Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 2,
+      "stepId": "step-2",
+      "tool": "get_transaction",
+      "arguments": {
+        "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+      },
+      "startedAt": "2026-10-23T08:38:01.145Z",
+      "completedAt": "2026-10-23T08:38:01.910Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 3,
+      "stepId": "step-2",
+      "tool": "get_transaction_receipt",
+      "arguments": {
+        "hash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399"
+      },
+      "startedAt": "2026-10-23T08:38:01.145Z",
+      "completedAt": "2026-10-23T08:38:01.816Z",
+      "status": "SUCCEEDED"
+    },
+    {
+      "sequence": 4,
+      "stepId": "step-3",
+      "tool": "get_block",
+      "arguments": {
+        "block": "20776323",
+        "includeTransactions": false
+      },
+      "startedAt": "2026-10-23T08:38:01.910Z",
+      "completedAt": "2026-10-23T08:38:02.095Z",
+      "status": "SUCCEEDED"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "chain-id",
+      "stepId": "step-1",
+      "status": "VERIFIED",
+      "expected": 1672,
+      "actual": 1672
+    },
+    {
+      "id": "hash-reconciliation",
+      "stepId": "step-2",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "transaction-chain",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": 1672
+    },
+    {
+      "id": "inclusion-block",
+      "stepId": "step-3",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "receipt-status",
+      "stepId": "step-2",
+      "status": "VERIFIED",
+      "actual": "SUCCEEDED"
+    }
+  ],
+  "result": {
+    "classification": "TRANSACTION_CONFIRMED",
+    "workflow": "transaction_receipt",
+    "chainId": 1672,
+    "transactionHash": "0xa2d0fd2a0289352badaf4f151c46dfd807de12d7f43b4008f236e4ca7bfe6399",
+    "from": "0x15ddce897d76ac39c188ade4d353711a60395315",
+    "to": "0x869379f2d9df67891e0159dd2520dc1681908f10",
+    "blockNumber": "20776323",
+    "blockTimestamp": 1792527662,
+    "status": "SUCCEEDED",
+    "gasUsed": "129673",
+    "effectiveGasPrice": "15000000000"
+  },
+  "status": "VERIFIED",
+  "error": null,
+  "createdAt": "2026-10-23T08:37:58.144Z",
+  "updatedAt": "2026-10-23T08:38:02.259Z",
+  "historical": true
+}

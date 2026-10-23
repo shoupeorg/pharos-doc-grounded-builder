@@ -5,6 +5,6 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
-  "d1_databases": [{ "binding": "DB", "database_name": "pharos-doc-grounded-builder", "database_id": "REPLACE_AFTER_CREATION", "migrations_dir": "migrations" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "pharos-doc-grounded-builder", "database_id": "a3d9e44b-d6a9-4ede-bf63-590ebdc2143b", "migrations_dir": "migrations" }],
   "observability": { "enabled": true }
 }
